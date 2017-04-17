@@ -132,6 +132,7 @@ Mesh.sphere = function()
 
 
 function Model() {
+    //this.mesh = Mesh.cube();
     this.mesh = Mesh.sphere();
     this.xAxis = vec3.fromValues(1, 0, 0);
     this.yAxis = vec3.fromValues(0, 1, 0);
@@ -175,8 +176,8 @@ Model.prototype.render = function() {
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.vertexIndexBuffer);
 
+    shader.setUniforms();
     shader.bind();
-    
     gl.uniformMatrix4fv(shader.attributes.mMatrix, false, this.mMatrix);
     gl.uniformMatrix4fv(shader.attributes.pvmMatrix, false, this.hpvmMatrix);
 
@@ -261,6 +262,7 @@ Shader.loadFiles = function(urls, callback, errorCallback) {
         Shader.loadFile(urls[i], i, partialCallback, errorCallback);
     }
 }
+
 //Shader instances
 function SimpleShader() {
     var SimpleShader_id = "simpleShader";
@@ -324,9 +326,9 @@ SimpleShader.prototype.unbind = function() {
 
 //Main renderer manager
 function Renderer() {
-    this.eye = vec3.fromValues(0.5, 0.5, -1.5);
-    this.center = vec3.fromValues(0.5, 0.5, 0);
-    this.up = vec3.fromValues(0, 1, 0);
+    this.eye = vec3.clone(defaultEye);
+    this.center = vec3.clone(defaultCenter);
+    this.up = vec3.clone(defaultUp);
     this.pMatrix = mat4.create();
     this.vMatrix = mat4.create();
     this.hMatrix = mat4.create();
@@ -347,6 +349,8 @@ Renderer.prototype.update = function() {
     mat4.lookAt(this.vMatrix, this.eye, this.center, this.up);
     mat4.multiply(this.hpvMatrix, this.hMatrix, this.pMatrix);
     mat4.multiply(this.hpvMatrix, this.hpvMatrix, this.vMatrix);
+    this.simpleShader.uniforms.eye = this.eye;
+    this.processKeys();
 }
 
 Renderer.prototype.render = function() {
@@ -355,10 +359,71 @@ Renderer.prototype.render = function() {
     this.model.render();   
 }
 
+Renderer.prototype.handleKeyUp = function(event) {
+    if(event.key == "Shift") { shiftModifier = false; return; }
+    keyPress = null
+}
+Renderer.prototype.handleKeyDown = function(event) {
+    if(event.key == "Shift") { shiftModifier = true; return; }
+    keyPress = event.code
+}
+
+Renderer.prototype.processKeys = function() {
+    var lookAt = vec3.create();
+    var viewRight = vec3.create();
+    var temp = vec3.create();
+
+    lookAt = vec3.normalize(lookAt, vec3.subtract(temp, renderer.center, renderer.eye));
+    viewRight = vec3.normalize(viewRight, vec3.cross(temp, lookAt, renderer.up));
+
+    var viewDelta = 0.1;
+
+    switch(keyPress) {
+        case "KeyA" :
+            if (!shiftModifier)
+                renderer.eye = vec3.add(renderer.eye, renderer.eye, vec3.scale(temp, viewRight, viewDelta));
+            renderer.center = vec3.add(renderer.center, renderer.center, vec3.scale(temp, viewRight, viewDelta));
+            break;
+        case "KeyD" :
+            if (!shiftModifier)
+                renderer.eye = vec3.add(renderer.eye, renderer.eye, vec3.scale(temp, viewRight, -viewDelta));
+            renderer.center = vec3.add(renderer.center, renderer.center, vec3.scale(temp, viewRight, -viewDelta));
+            break;
+        case "KeyS" :
+            renderer.eye = vec3.add(renderer.eye, renderer.eye, vec3.scale(temp, lookAt, -viewDelta));
+            renderer.center = vec3.add(renderer.center, renderer.center, vec3.scale(temp, lookAt, -viewDelta));
+            break;
+        case "KeyW" :
+            renderer.eye = vec3.add(renderer.eye, renderer.eye, vec3.scale(temp, lookAt, viewDelta));
+            renderer.center = vec3.add(renderer.center, renderer.center, vec3.scale(temp, lookAt, viewDelta));
+            break;
+        /*
+        case "KeyQ" :
+            renderer.eye = vec3.add(renderer.eye, renderer.eye, vec3.scale(temp, renderer.up, -viewDelta));
+            renderer.center = vec3.add(renderer.center, renderer.center, vec3.scale(temp, renderer.up, -viewDelta));
+            break;
+        case "KeyE" :
+            renderer.eye = vec3.add(renderer.eye, renderer.eye, vec3.scale(temp, renderer.up, viewDelta));
+            renderer.center = vec3.add(renderer.center, renderer.center, vec3.scale(temp, renderer.up, viewDelta));
+            break;
+        */
+        case "Space" : 
+            renderer.eye = vec3.clone(defaultEye);
+            renderer.center = vec3.clone(defaultCenter);
+            renderer.up = vec3.clone(defaultUp);
+    }
+}
+
 //Global variables
 var gl;
 var renderer;
 var shaders = {};
+var acceptInputs = false;
+var keyPress = null;
+var shiftModifier = false;
+var defaultEye = vec3.fromValues(0.5, 0.5, -1.5);
+var defaultCenter = vec3.fromValues(0.5, 0.5, 0);
+var defaultUp = vec3.fromValues(0, 1, 0)
 
 function draw() {
     Shader.loadFiles(['shaders/simple.vs', 'shaders/simple.fs'], function(shader) {
@@ -367,15 +432,18 @@ function draw() {
         renderer = new Renderer();
         renderer.load();
         renderer.startTime = new Date();
-        setInterval(tick, 1000 / 60);
+        document.onkeydown = renderer.handleKeyDown;
+        document.onkeyup = renderer.handleKeyUp;
+        acceptInputs = true;
+        tick();
     })
 }
 
 function tick() {
     renderer.update();
     renderer.render();
+    window.requestAnimationFrame(tick);
 }
-
 
 //Main function
 function main() {
