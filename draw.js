@@ -326,9 +326,14 @@ SimpleShader.prototype.unbind = function() {
 
 //Main renderer manager
 function Renderer() {
-    this.eye = vec3.clone(defaultEye);
-    this.center = vec3.clone(defaultCenter);
-    this.up = vec3.clone(defaultUp);
+    this.defaultEye = vec3.fromValues(0.5, 0.5, -1.5);
+    this.defaultCenter = vec3.fromValues(0.5, 0.5, 0);
+    this.defaultUp = vec3.fromValues(0, 1, 0)
+    this.keyPress = null;
+    this.shiftModifier = false;
+    this.eye = vec3.clone(this.defaultEye);
+    this.center = vec3.clone(this.defaultCenter);
+    this.up = vec3.clone(this.defaultUp);
     this.pMatrix = mat4.create();
     this.vMatrix = mat4.create();
     this.hMatrix = mat4.create();
@@ -360,15 +365,16 @@ Renderer.prototype.render = function() {
 }
 
 Renderer.prototype.handleKeyUp = function(event) {
-    if(event.key == "Shift") { shiftModifier = false; return; }
-    keyPress = null
+    if(event.key == "Shift") { renderer.shiftModifier = false; return; }
+    renderer.keyPress = null
 }
 Renderer.prototype.handleKeyDown = function(event) {
-    if(event.key == "Shift") { shiftModifier = true; return; }
-    keyPress = event.code
+    if(event.key == "Shift") { renderer.shiftModifier = true; return; }
+    renderer.keyPress = event.code
 }
 
 Renderer.prototype.processKeys = function() {
+    if (!acceptInputs) return;
     var lookAt = vec3.create();
     var viewRight = vec3.create();
     var temp = vec3.create();
@@ -378,14 +384,14 @@ Renderer.prototype.processKeys = function() {
 
     var viewDelta = 0.1;
 
-    switch(keyPress) {
+    switch(renderer.keyPress) {
         case "KeyA" :
-            if (!shiftModifier)
+            if (!renderer.shiftModifier)
                 renderer.eye = vec3.add(renderer.eye, renderer.eye, vec3.scale(temp, viewRight, viewDelta));
             renderer.center = vec3.add(renderer.center, renderer.center, vec3.scale(temp, viewRight, viewDelta));
             break;
         case "KeyD" :
-            if (!shiftModifier)
+            if (!renderer.shiftModifier)
                 renderer.eye = vec3.add(renderer.eye, renderer.eye, vec3.scale(temp, viewRight, -viewDelta));
             renderer.center = vec3.add(renderer.center, renderer.center, vec3.scale(temp, viewRight, -viewDelta));
             break;
@@ -419,11 +425,6 @@ var gl;
 var renderer;
 var shaders = {};
 var acceptInputs = false;
-var keyPress = null;
-var shiftModifier = false;
-var defaultEye = vec3.fromValues(0.5, 0.5, -1.5);
-var defaultCenter = vec3.fromValues(0.5, 0.5, 0);
-var defaultUp = vec3.fromValues(0, 1, 0)
 
 function draw() {
     Shader.loadFiles(['shaders/simple.vs', 'shaders/simple.fs'], function(shader) {
