@@ -18,6 +18,7 @@ function draw() {
     var h = context.canvas.height;
     var imagedata = context.getImageData(0, 0, w, h);
     var inputImage = new ImageClass(w, h);
+    
     for(x = 0; x < w; x++) {
         for(y = 0; y < h; y++) {
             var color = getPixel(imagedata, x, y);
@@ -27,14 +28,17 @@ function draw() {
         }
     }
 
+    var medianCut = new MedianCut();
+    var quantizedImage = new ImageClass(w, h);
+    medianCut.quantizeImage(inputImage, quantizedImage);
+
     var sobelFilter = new SobelFilter();
     var outlineImage = new ImageClass(w, h);
     sobelFilter.applyFilter(inputImage, outlineImage);
-    var outputImage = ImageClass.multiplyImages(inputImage, outlineImage);
-
+    var outputImage = ImageClass.multiplyImages(quantizedImage, outlineImage);
+    
     for(x = 0; x < w; x++) {
         for(y = 0; y < h; y++) {
-            var c = [0, 0, 0, 255];
             putPixel(imagedata, x, y, outputImage.data[x][y]);
         }
     }
