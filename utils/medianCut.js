@@ -63,7 +63,7 @@ MedianCut.prototype.quantizeImage = function(image, outputImage) {
 }
 
 MedianCut.prototype.performCut = function(bins, depth) {
-    if (depth == 5) {
+    if (depth == this.logNumberOfColors) {
         return [bins[Math.floor(bins.length / 2)]];
     }
     this.index = this.maxIndex(bins);

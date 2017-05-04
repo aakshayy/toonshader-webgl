@@ -3,13 +3,55 @@
     <head>
         <meta charset="UTF-8">
         <title> Toon Shading - 2d </title>
+        <link href="utils/ui/jquery-ui.css" rel="stylesheet">
+        <style>
+            fieldset {
+                position:relative;
+                float:left;
+                width:150px;
+                height: 100%;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+            }
+            .tab {
+                margin:10px;
+            }
+        </style>
+    </head>
+    <body onload="main();">
+        <fieldset>
+            <div class="tab">
+                <h2>2d Toon Shading</h2>
+            </div>
+            <div class = "tab">
+                <label for="image1">Image 1 : </label>
+                <select name="image1" id="image1" onchange="changeImage();" class="ui-selectmenu-button ui-selectmenu-button-closed ui-corner-all ui-button ui-widget">
+                    <option></option>
+                </select>
+            </div>
+            <div class = "tab">
+                <label for="image2">Image 2 : </label>
+                <select name="image2" id="image2" onchange="changeImage();" class="ui-selectmenu-button ui-selectmenu-button-closed ui-corner-all ui-button ui-widget">
+                    <option></option>
+                </select>
+            </div>
+            <div id="controlColors" class = "tab">
+                <label for="colors">Number of Colors: </label>
+                <select id="colors" name="colors" value="32">
+                    <option>2</option><option>4</option><option>8</option><option>16</option><option selected>32</option><option>64</option>
+                </select>
+            </div>
+            <div class = "tab">
+                <button class="ui-button ui-widget ui-corner-all" onclick="redraw();">Render</button>
+            </div>
+        </fieldset>
+        <canvas id = "canvas1" height="512" width="380" style="border: 1px solid #666"></canvas>
+        <canvas id = "canvas2" height="512" width="380" style="border: 1px solid #666"></canvas>
+        <script type="text/javascript" src="utils/ui/external/jquery/jquery.js"></script>
+        <script type="text/javascript" src="utils/ui/jquery-ui.js"></script>
+        <script type="text/javascript" src="utils/ui2d.js"></script> 
         <script type="text/javascript" src = "utils/sobelfilter.js"></script>
         <script type="text/javascript" src = "utils/medianCut.js"></script>
         <script type="text/javascript" src = "utils/image.js"></script>
         <script type="text/javascript" src = "draw2d.js"></script>
-    </head>
-    <body onload="main();">
-        <canvas id = "toonShadingCanvas"></canvas>
-        <img id = "sourceImage">
     </body>
 </html>
