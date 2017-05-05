@@ -75,6 +75,7 @@ Renderer.prototype.draw = function() {
     this.update();
     this.render(this.context1, this.outputImage);
     this.updateMenu();
+    console.log("Done")
 }
 
 function changeImage() {
