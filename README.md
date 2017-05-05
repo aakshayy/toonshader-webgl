@@ -39,7 +39,7 @@ Basic:
 
 ### Demo
 ---
-[Toon Shading](http://rawgit.com/aakshayy/toonshader-webgl/master/index.html)
+[Toon Shading](https://aakshayy.github.io/toonshader-webgl/)
 
 ### Screencast
 ---
