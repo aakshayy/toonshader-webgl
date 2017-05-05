@@ -42,6 +42,9 @@ Renderer.prototype.load = function() {
 Renderer.prototype.update = function() {
     var e = document.getElementById("model");
     this.model = this.models[e.options[e.selectedIndex].value];
+    e = document.getElementById("colors");
+    this.celShader.uniforms.tones = e.options[e.selectedIndex].value;
+    this.celShader.uniforms.specularTones = e.options[e.selectedIndex].value / 2;
     var dt = (new Date() - this.startTime);
     mat4.lookAt(this.vMatrix, this.eye, this.center, this.up);
     mat4.multiply(this.hpvMatrix, this.hMatrix, this.pMatrix);
