@@ -2,7 +2,79 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title> Toon Shading </title>        
+        <title> Toon Shading </title>
+        <link href="utils/ui/jquery-ui.css" rel="stylesheet">
+        <style>
+            fieldset {
+                position:relative;
+                float:left;
+                width:150px;
+                height: 100%;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+            }
+            .tab {
+                margin:10px;
+            }
+        </style>
+    </head>
+    <body onload="main();">
+        <fieldset>
+            <div class="tab">
+                <h2>2d Toon Shading</h2>
+            </div>
+            <div id="controlModel" class = "tab">
+                <div class = "tab">
+                <label for="model">Model : </label>
+                <select name="model" id="model" class="ui-selectmenu-button ui-selectmenu-button-closed ui-corner-all ui-button ui-widget">
+                    <option selected value="sphere">Sphere</option>
+                    <option value="cube">Cube</option>
+                </select>
+            </div>
+            <div class="tab">
+                <label for="shaders">Shader : </label><br>
+                <label for="shader-simple">Phong Shader</label>
+                <input checked type="radio" name="shaders" id="shader-simple">
+                <label for="shader-toon">Toon Shader</label>
+                <input type="radio" name="shaders" id="shader-toon">
+                <label for="shader-outline"></label>
+            </div>
+            <div class="tab">
+                <label for="passes">Passes : </label><br>
+                <label for="shader-pass1">Pass1</label>
+                <input class="pass" type="checkbox" name="passes" id="shader-pass1">
+                <label for="shader-pass2">Pass2</label>
+                <input class="pass" type="checkbox" name="passes" id="shader-pass2">
+                <label for="shader-outline"></label>
+            </div>
+            <div class="tab">
+                <label for="colors">Number of Colors: </label>
+                <select id="colors" name="colors" value="32">
+                    <option>2</option>
+                    <option>4</option>
+                    <option>8</option>
+                    <option>16</option>
+                    <option selected>32</option>
+                    <option>64</option>
+                </select>
+            </div>
+        </fieldset>
+        <canvas id = "toonShadingCanvas" height = "512" width="512"></canvas>
+        <script type="text/javascript" src="utils/ui/external/jquery/jquery.js"></script>
+        <script type="text/javascript" src="utils/ui/jquery-ui.js"></script>
+        <script>
+            $(function(){
+                $("input").checkboxradio();
+                function handleShader(e) {
+                    renderer.shaderSelected = $(e.target)[0].id;
+                }
+                function handlePasses(e) {
+                    renderer.pass1 = document.getElementById("shader-pass1").checked;
+                    renderer.pass2 = document.getElementById("shader-pass2").checked;
+                }
+                $("[name='shaders']").on("change", handleShader);
+                $("[name='passes']").on("change", handlePasses);
+            });
+        </script>
         <script type="text/javascript" src = "utils/gl-matrix.js"></script>
         <script type="text/javascript" src = "utils/mesh.js"></script>
         <script type="text/javascript" src = "utils/model.js"></script>
@@ -11,8 +83,5 @@
         <script type="text/javascript" src = "utils/celShader.js"></script>
         <script type="text/javascript" src = "utils/outlineShader.js"></script>
         <script type="text/javascript" src = "draw.js"></script>
-    </head>
-    <body onload="main();">
-        <canvas id = "toonShadingCanvas" height = "512" width="512"></canvas>
     </body>
 </html>

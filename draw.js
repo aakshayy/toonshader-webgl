@@ -14,7 +14,10 @@ function Renderer() {
     this.hpvMatrix = mat4.create();
     mat4.fromScaling(this.hMatrix, vec3.fromValues(-1, 1, 1));
     mat4.perspective(this.pMatrix, 0.5 * Math.PI, 1.0, 0.1, 10);
-    this.model = new Model();
+    this.models = {}
+    this.models.cube = new Model("cube");
+    this.models.sphere = new Model("sphere");
+    this.model = this.models.cube;
 }
 
 Renderer.prototype.load = function() {
@@ -31,9 +34,14 @@ Renderer.prototype.load = function() {
     this.outlineShader.setUniforms();
     this.activeShaders = [this.simpleShader, this.celShader, this.outlineShader];
     this.activeShaderIndex = 0;
+    this.pass1 = true;
+    this.pass2 = true;
+    this.shaderSelected = "shader-simple";
 }
 
 Renderer.prototype.update = function() {
+    var e = document.getElementById("model");
+    this.model = this.models[e.options[e.selectedIndex].value];
     var dt = (new Date() - this.startTime);
     mat4.lookAt(this.vMatrix, this.eye, this.center, this.up);
     mat4.multiply(this.hpvMatrix, this.hMatrix, this.pMatrix);
@@ -45,17 +53,20 @@ Renderer.prototype.update = function() {
 Renderer.prototype.render = function() {
     gl.clearColor(0.75, 0.75, 0.75, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    if(this.activeShaderIndex == 2) {
-        this.model.render(this.activeShaders[2], this.hpvMatrix);
-        this.model.render(this.activeShaders[1], this.hpvMatrix);
+    if(this.shaderSelected == "shader-toon") {
+        if(this.pass1)
+            this.model.render(this.activeShaders[2], this.hpvMatrix);
+        if(this.pass2)
+            this.model.render(this.activeShaders[1], this.hpvMatrix);
     }
-    else 
-        this.model.render(this.activeShaders[this.activeShaderIndex], this.hpvMatrix);
+    else if(this.shaderSelected == "shader-simple") {
+        this.model.render(this.activeShaders[0], this.hpvMatrix);
+    }
 }
 
 Renderer.prototype.handleKeyUp = function(event) {
     if(event.key == "Shift") { renderer.shiftModifier = false; return; }
-    renderer.keyPress = null
+    renderer.keyPress = null;
 }
 Renderer.prototype.handleKeyDown = function(event) {
     if(event.key == "Shift") { renderer.shiftModifier = true; return; }
@@ -65,11 +76,8 @@ Renderer.prototype.handleKeyDown = function(event) {
             renderer.center = vec3.clone(renderer.defaultCenter);
             renderer.up = vec3.clone(renderer.defaultUp);
             return;
-        case "KeyX" :
-            renderer.activeShaderIndex = (renderer.activeShaderIndex + 1 ) % renderer.activeShaders.length;
-            return;
     }
-    renderer.keyPress = event.code
+    renderer.keyPress = event.code;
 }
 
 Renderer.prototype.processKeys = function() {

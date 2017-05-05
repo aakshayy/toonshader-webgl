@@ -1,6 +1,8 @@
-function Model() {
-    //this.mesh = Mesh.cube();
-    this.mesh = Mesh.sphere();
+function Model(name) {
+    if(name == "cube")
+        this.mesh = Mesh.cube();
+    else if(name == "sphere")
+        this.mesh = Mesh.sphere();
     this.xAxis = vec3.fromValues(1, 0, 0);
     this.yAxis = vec3.fromValues(0, 1, 0);
     this.translation = vec3.fromValues(0.5, 0.5, 0.5);
